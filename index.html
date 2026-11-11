@@ -57,11 +57,15 @@
   .fallback .qr img { width: 104px; height: 104px; border-radius: 10px; background: #fff; padding: 6px; }
   .fallback .qr span { font-size: 12px; line-height: 1.45; color: #9a968f; word-break: break-all; }
   .fallback .qr b { display: block; color: #e2dfd9; margin-bottom: 3px; }
-  .ar-link { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
-    background: #e8e6e1; color: #12141a; border-radius: 12px; padding: 13px 18px;
-    font-size: 15px; font-weight: 600; text-decoration: none; }
-  .ar-link img { display: none; }
-  .ar-link[hidden] { display: none !important; }
+  /* Safari only treats rel="ar" as an AR link when the anchor has ONE element child
+     (img/picture). The label therefore lives in a sibling span, not inside the anchor. */
+  .ar-wrap { flex: 1; position: relative; display: flex; align-self: stretch; min-height: 46px; }
+  .ar-link { position: absolute; inset: 0; display: block; border-radius: 12px;
+    background: #e8e6e1; color: #12141a; text-decoration: none; overflow: hidden; }
+  .ar-link img { width: 100%; height: 100%; display: block; opacity: 0; }
+  .ar-label { position: relative; margin: auto; pointer-events: none; font-size: 15px;
+    font-weight: 600; color: #12141a; }
+  .ar-wrap[hidden] { display: none !important; }
 </style>
 </head>
 <body>
@@ -124,10 +128,10 @@
   </div>
   <div class="row">
     <button id="arBtn">Ver en tamaño real</button>
-    <a id="qlLink" rel="ar" href="model.usdz?v=16" class="ar-link" hidden>
-      <img src="poster.jpg" alt="" width="1" height="1">
-      <span>Ver en tamaño real</span>
-    </a>
+    <div class="ar-wrap" id="qlWrap" hidden>
+      <a id="qlLink" rel="ar" href="model.usdz?v=16" class="ar-link" aria-label="Ver en tamaño real: portatarjetas en AR"><img src="poster.jpg" alt="" width="1" height="1"></a>
+      <span class="ar-label">Ver en tamaño real</span>
+    </div>
     <button id="topBtn" class="ghost">Ver ranuras</button>
     <button id="resetBtn">Reiniciar</button>
   </div>
@@ -188,19 +192,19 @@
   const supportsAR = () => {
     if (mv.canActivateAR) {
       arBtn.style.display = 'block';
-      qlLink.hidden = true;
+      qlWrap.hidden = true;
       fallback.style.display = 'none';
       return;
     }
     if (isIOS) {
       // iOS has no WebXR: hand off to AR Quick Look with the USDZ
-      qlLink.hidden = false;
+      qlWrap.hidden = false;
       arBtn.style.display = 'none';
       fallback.style.display = 'none';
       hint.innerHTML = '<span class="badge">1:1</span>Toca «Ver en tamaño real» para abrirlo con la cámara. Si no reacciona, abrí esta misma página en Safari.';
       return;
     }
-    qlLink.hidden = true;
+    qlWrap.hidden = true;
     fallback.style.display = 'block';
   };
   mv.addEventListener('ar-status', (e) => {
