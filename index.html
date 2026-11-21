@@ -159,6 +159,8 @@
     if (!mv.model) return;
     mv.model.materials.forEach((m) => {
       const n = (m.name || '').toLowerCase();
+      // the rainbow wordmark keeps the colours baked into the GLB: one letter, one hue
+      if (n.indexOf('letter') !== -1) return;
       let hex = theme.body;
       if (n.indexOf('pad') !== -1) hex = theme.pad || '#f8fcfb';
       else if (n.indexOf('blue') !== -1) hex = ACCENT;
